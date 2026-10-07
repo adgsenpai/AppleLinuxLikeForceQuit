@@ -3,6 +3,8 @@
 A clone of macOS's **Force Quit Applications** panel (⌘ ⌥ ⎋) for Linux.
 Press **Super + Alt + Escape**, pick the frozen app, click **Force Quit**.
 
+🌐 **Website & blog:** https://adgsenpai.github.io/AppleLinuxLikeForceQuit/
+
 <p align="center">
   <img src="screenshots/force-quit.png" width="420" alt="Force Quit window">
   <img src="screenshots/force-quit-dark.png" width="420" alt="Force Quit window, dark">
@@ -67,3 +69,7 @@ An app is marked *Not Responding* when its process is stopped.
 ## License
 
 MIT
+
+---
+
+Made with ❤️ by [ADGSTUDIOS](https://adgstudios.co.za)

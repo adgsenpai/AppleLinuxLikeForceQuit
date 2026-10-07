@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to force quit a frozen app on Linux (Ubuntu, GNOME, Wayland) – Force Quit for Linux</title>
+<meta name="description" content="Every way to force quit an unresponsive app on Ubuntu and GNOME: the Not Responding dialog, System Monitor, kill/pkill, why xkill fails on Wayland, and a Ctrl+Alt+Esc-style shortcut.">
+<meta name="author" content="Ashlin Darius Govindasamy, ADGSTUDIOS">
+<meta name="publisher" content="ADGSTUDIOS">
+<link rel="canonical" href="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/blog/how-to-force-quit-frozen-apps-on-linux.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to force quit a frozen app on Linux">
+<meta property="og:description" content="The GNOME dialog, System Monitor, kill commands, xkill on Wayland, and a one-key shortcut.">
+<meta property="og:url" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/blog/how-to-force-quit-frozen-apps-on-linux.html">
+<meta property="og:image" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to force quit a frozen app on Linux",
+  "description": "Kill an unresponsive application on Ubuntu, GNOME and Wayland.",
+  "step": [
+    { "@type": "HowToStep", "name": "Use a Force Quit shortcut", "text": "Install Force Quit for Linux and press Super+Alt+Escape, select the app and click Force Quit." },
+    { "@type": "HowToStep", "name": "Use GNOME's Not Responding dialog", "text": "When GNOME shows that an app is not responding, click Force Quit." },
+    { "@type": "HowToStep", "name": "Use System Monitor", "text": "Open System Monitor, right-click the process and choose Kill." },
+    { "@type": "HowToStep", "name": "Use the terminal", "text": "Run pkill -9 -f appname or kill -9 PID." }
+  ]
+}
+</script>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="../">Force Quit for Linux</a>
+  <a href="../#install">Install</a>
+  <a href="../#blog">Blog</a>
+  <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">GitHub</a>
+  <a href="https://adgstudios.co.za">ADGSTUDIOS</a>
+</div></nav>
+
+<article class="wrap narrow">
+  <p class="meta"><time datetime="2026-10-07">7 October 2026</time> · Ashlin Darius Govindasamy · 5 min read</p>
+  <h1>How to force quit a frozen app on Linux (Ubuntu, GNOME, Wayland)</h1>
+
+  <p>Windows has <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Del</kbd> and macOS has <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>esc</kbd>. On Ubuntu, a frozen app often leaves people unsure what to do. Here is every method, from fastest to most thorough.</p>
+
+  <h2>1. A Force Quit shortcut (fastest)</h2>
+  <p>Install <a href="../">Force Quit for Linux</a> and press <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Esc</kbd>. A macOS-style window lists your open apps. Select the frozen one, press <kbd>Return</kbd>, and confirm.</p>
+<pre><code>git clone https://github.com/adgsenpai/AppleLinuxLikeForceQuit.git
+cd AppleLinuxLikeForceQuit && ./install.sh</code></pre>
+  <figure>
+    <img src="../img/force-quit.png" width="420" height="410" alt="Force Quit Applications window listing running apps">
+  </figure>
+
+  <h2>2. GNOME's “not responding” dialog</h2>
+  <p>If a window stops answering the compositor's pings, GNOME eventually shows <em>“App is not responding”</em> with <strong>Force Quit</strong> and <strong>Wait</strong> buttons. It works, but only once GNOME notices, and only for the window you're trying to use.</p>
+  <p>You can make it appear sooner by lowering the check interval (in milliseconds):</p>
+<pre><code>gsettings set org.gnome.mutter check-alive-timeout 3000</code></pre>
+
+  <h2>3. System Monitor</h2>
+  <p>Open <strong>System Monitor</strong> from the app grid, find the process on the <em>Processes</em> tab, right-click it and choose <strong>Kill</strong> (<kbd>Ctrl</kbd>+<kbd>K</kbd>). The catch is that it lists processes, not apps. Chrome alone can show twenty entries.</p>
+
+  <h2>4. The terminal</h2>
+<pre><code># by name (matches the full command line)
+pkill -9 -f firefox
+
+# by PID
+pgrep -a firefox     # find it
+kill -9 12345        # kill it
+
+# everything owned by an app's systemd scope
+systemctl --user list-units 'app-*' --type=scope
+systemctl --user kill -s KILL app-gnome-firefox_firefox-12345.scope</code></pre>
+  <p>Try a plain <code>kill</code> (SIGTERM) first if you want the app to have a chance to save. Use <code>-9</code> (SIGKILL) when it's truly stuck, because a frozen app can't block it.</p>
+
+  <h2>5. Why <code>xkill</code> doesn't work any more</h2>
+  <p><code>xkill</code> lets you click a window to kill it, but it talks to the X server. On Wayland, which Ubuntu has used by default since 21.04, it can only see apps running under XWayland. Native Wayland apps are invisible to it, and so is most of GNOME. Wayland doesn't let one program inspect another program's windows. That's why Force Quit for Linux finds apps through <a href="macos-force-quit-for-linux.html">systemd scopes</a> instead.</p>
+
+  <h2>Quick comparison</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Speed</th><th>Works on Wayland</th><th>Shows apps (not processes)</th></tr></thead>
+    <tbody>
+      <tr><td>Force Quit for Linux</td><td>One shortcut</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>GNOME not-responding dialog</td><td>Wait for timeout</td><td>Yes</td><td>One window</td></tr>
+      <tr><td>System Monitor</td><td>Slow</td><td>Yes</td><td>No</td></tr>
+      <tr><td><code>pkill</code> / <code>kill</code></td><td>Fast if you know the name</td><td>Yes</td><td>No</td></tr>
+      <tr><td><code>xkill</code></td><td>Fast</td><td>XWayland apps only</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+
+  <h2>When the whole desktop is frozen</h2>
+  <p>If nothing responds, switch to a text console with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd>, log in, and run <code>pkill -9 -u $USER firefox</code> (or whatever is stuck). Switch back with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F2</kbd> or <kbd>F1</kbd>. As a last resort, the kernel's SysRq keys, if enabled, can kill the process using the most memory: <kbd>Alt</kbd>+<kbd>SysRq</kbd>+<kbd>F</kbd>.</p>
+
+  <div class="callout">
+    Want the Mac experience? <a href="../#install">Install Force Quit for Linux</a>. It's free, open source, and takes 30 seconds.
+  </div>
+</article>
+
+<footer><div class="wrap">
+  Made with <span aria-label="love">❤️</span> by <a href="https://adgstudios.co.za"><strong>ADGSTUDIOS</strong></a> · MIT licensed · <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">Source on GitHub</a> · macOS is a trademark of Apple Inc. Not affiliated with Apple.
+</div></footer>
+</body>
+</html>

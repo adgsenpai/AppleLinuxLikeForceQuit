@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I cloned macOS Force Quit for Linux (Super+Alt+Esc on Wayland) – Force Quit for Linux</title>
+<meta name="description" content="How I rebuilt the macOS Force Quit Applications window for Ubuntu and GNOME on Wayland using GTK 4, systemd scopes and /proc, opened with Super+Alt+Escape.">
+<meta name="author" content="Ashlin Darius Govindasamy, ADGSTUDIOS">
+<meta name="publisher" content="ADGSTUDIOS">
+<link rel="canonical" href="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/blog/macos-force-quit-for-linux.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I cloned macOS Force Quit for Linux">
+<meta property="og:description" content="Wayland won't tell you what windows exist. Here's how a Force Quit panel finds apps anyway.">
+<meta property="og:url" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/blog/macos-force-quit-for-linux.html">
+<meta property="og:image" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "I cloned macOS Force Quit for Linux (and made Super+Alt+Esc work on Wayland)",
+  "datePublished": "2026-10-07",
+  "image": "https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png",
+  "author": { "@type": "Person", "name": "Ashlin Darius Govindasamy", "url": "https://github.com/adgsenpai" },
+  "mainEntityOfPage": "https://adgsenpai.github.io/AppleLinuxLikeForceQuit/blog/macos-force-quit-for-linux.html"
+}
+</script>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="../">Force Quit for Linux</a>
+  <a href="../#install">Install</a>
+  <a href="../#blog">Blog</a>
+  <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">GitHub</a>
+  <a href="https://adgstudios.co.za">ADGSTUDIOS</a>
+</div></nav>
+
+<article class="wrap narrow">
+  <p class="meta"><time datetime="2026-10-07">7 October 2026</time> · Ashlin Darius Govindasamy · 6 min read</p>
+  <h1>I cloned macOS Force Quit for Linux (and made Super+Alt+Esc work on Wayland)</h1>
+
+  <p>If you've used a Mac, you know <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>esc</kbd>. An app freezes, you press it, a small window lists your apps, you click <strong>Force Quit</strong>, and you're back to work. When I moved to Ubuntu, I missed that window more than anything else from macOS.</p>
+
+  <p>Linux has <em>ways</em> to kill apps (I go through all of them in <a href="how-to-force-quit-frozen-apps-on-linux.html">this guide</a>), but nothing as quick. So I built one: <strong>Force Quit Applications for Linux</strong>, opened with <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Esc</kbd>.</p>
+
+  <figure>
+    <img src="../img/force-quit.png" width="420" height="410" alt="The Force Quit Applications window running on Ubuntu 26.04">
+    <figcaption>Running on Ubuntu 26.04 with GNOME 50 on Wayland.</figcaption>
+  </figure>
+
+  <h2>The hard part: Wayland won't list windows</h2>
+  <p>On X11 you'd just ask the X server for every window and its PID. That's how <code>xkill</code> and <code>wmctrl</code> work. Wayland deliberately doesn't allow this: a client can see only its own windows. That's good for security, but it means a Force Quit app can't simply ask what's open.</p>
+
+  <p>The answer was <strong>systemd</strong>. When GNOME Shell launches an app, it puts the app in its own transient systemd scope, named after the app's desktop file:</p>
+<pre><code>$ cat /proc/23213/cgroup
+0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-gnome-org.gnome.Calculator-23213.scope</code></pre>
+  <p>That unit name contains <code>org.gnome.Calculator</code>, which maps straight to <code>org.gnome.Calculator.desktop</code>, which gives the app's name and icon. So the plan is to read <code>/proc/*/cgroup</code> for every process you own and group them by app. No compositor access needed.</p>
+
+  <h2>The edge cases</h2>
+  <ul>
+    <li><strong>D-Bus activated apps</strong>, such as the terminal, start inside <code>dbus.service</code> rather than their own scope. For these, the tool matches the executable name against desktop files, but only for processes that have <code>WAYLAND_DISPLAY</code> or <code>DISPLAY</code> in their environment. That filters out background daemons.</li>
+    <li><strong>Chrome</strong> runs its main process in a hidden <code>com.google.Chrome</code> scope and its helpers in a <code>google-chrome</code> scope. Groups are merged by walking parent PIDs, and the merged group takes the name of the desktop file that's visible in the app grid.</li>
+    <li><strong>What counts as an app.</strong> macOS lists only apps that appear in the Dock. Here the rule is: if it isn't shown in the app grid (<code>NoDisplay=true</code>), it isn't listed. That hides tray helpers and backup monitors.</li>
+    <li><strong>Snap and Flatpak</strong> scopes (<code>snap.firefox.firefox-…</code>, <code>app-flatpak-…</code>) are parsed too.</li>
+  </ul>
+
+  <h2>Killing it like a Mac does</h2>
+  <p>macOS Force Quit doesn't politely ask the app to close. It sends <code>SIGKILL</code>. This tool does the same: it collects the app's processes and all of their descendants, then kills them. A frozen app can't ignore <code>SIGKILL</code>, and that's why it works.</p>
+  <figure>
+    <img src="../img/confirm.png" width="272" height="216" alt="Confirmation dialog: Do you want to force AnyDesk to quit?">
+    <figcaption>The same confirmation as on the Mac, with the app's icon.</figcaption>
+  </figure>
+
+  <h2>Making GTK 4 look like macOS</h2>
+  <p>The UI is a single GTK 4 window with custom CSS: traffic-light buttons, a <code>#ececec</code> window background, a white list with the <code>#0064e1</code> selection blue, and a gradient default button. One surprise: my own <code>~/.config/gtk-4.0/gtk.css</code> (an Orchis theme) loads at <em>user</em> priority, which beats normal application CSS. Loading the stylesheet at <code>STYLE_PROVIDER_PRIORITY_USER + 1</code> keeps the Mac look on any theme.</p>
+
+  <p>Details copied from the Mac:</p>
+  <ul>
+    <li>The first app is preselected, so <kbd>Return</kbd> works straight away</li>
+    <li>Frozen apps are shown in red as <em>(Not Responding)</em></li>
+    <li>Files is always at the bottom and gets <strong>Relaunch</strong>, like Finder</li>
+    <li>Pressing the shortcut again brings the existing window forward (single-instance <code>Gtk.Application</code>)</li>
+    <li>The selection turns grey when the window loses focus</li>
+  </ul>
+
+  <h2>Binding Super+Alt+Esc</h2>
+  <p><code>install.sh</code> adds a GNOME custom keybinding through <code>gsettings</code>. It appends to your existing custom shortcuts instead of replacing them. Super+Alt+Esc is free on stock GNOME: Alt+Esc cycles windows and Super+Esc restores shortcuts, but the combination of all three isn't taken.</p>
+
+  <div class="callout">
+    <strong>Try it:</strong> <code>git clone https://github.com/adgsenpai/AppleLinuxLikeForceQuit && cd AppleLinuxLikeForceQuit && ./install.sh</code><br>
+    Source and issues on <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">GitHub</a>. A ⭐ helps other people find it.
+  </div>
+</article>
+
+<footer><div class="wrap">
+  Made with <span aria-label="love">❤️</span> by <a href="https://adgstudios.co.za"><strong>ADGSTUDIOS</strong></a> · MIT licensed · <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">Source on GitHub</a> · macOS is a trademark of Apple Inc. Not affiliated with Apple.
+</div></footer>
+</body>
+</html>

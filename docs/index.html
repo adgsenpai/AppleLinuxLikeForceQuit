@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force Quit for Linux – macOS Force Quit Applications clone (Super+Alt+Esc)</title>
+<meta name="description" content="Free, open-source clone of the macOS Force Quit Applications window for Linux. Press Super+Alt+Escape to kill frozen apps on Ubuntu, GNOME and Wayland.">
+<meta name="keywords" content="force quit linux, ctrl alt esc linux, macos force quit linux, kill frozen app ubuntu, wayland xkill alternative, gnome force quit, task manager linux">
+<meta name="author" content="Ashlin Darius Govindasamy, ADGSTUDIOS">
+<meta name="publisher" content="ADGSTUDIOS">
+<link rel="canonical" href="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Force Quit for Linux – the macOS ⌘⌥⎋ panel, on Ubuntu">
+<meta property="og:description" content="Press Super+Alt+Escape, pick the frozen app, click Force Quit. Works on GNOME and Wayland.">
+<meta property="og:url" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/">
+<meta property="og:image" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Force Quit for Linux – macOS Force Quit Applications clone">
+<meta name="twitter:description" content="Super+Alt+Escape → kill frozen apps on Ubuntu, GNOME and Wayland. Free and open source.">
+<meta name="twitter:image" content="https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Force Quit Applications for Linux",
+  "operatingSystem": "Linux",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "A clone of the macOS Force Quit Applications panel for Linux, opened with Super+Alt+Escape.",
+  "url": "https://adgsenpai.github.io/AppleLinuxLikeForceQuit/",
+  "downloadUrl": "https://github.com/adgsenpai/AppleLinuxLikeForceQuit",
+  "screenshot": "https://adgsenpai.github.io/AppleLinuxLikeForceQuit/img/force-quit.png",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Ashlin Darius Govindasamy", "url": "https://github.com/adgsenpai" }
+}
+</script>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="./">Force Quit for Linux</a>
+  <a href="#install">Install</a>
+  <a href="#blog">Blog</a>
+  <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">GitHub</a>
+  <a href="https://adgstudios.co.za">ADGSTUDIOS</a>
+</div></nav>
+
+<header class="hero wrap">
+  <h1>Force Quit Applications,<br>now on Linux.</h1>
+  <p>The macOS <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>esc</kbd> panel, cloned for Ubuntu and GNOME. Press <kbd>Super</kbd> <kbd>Alt</kbd> <kbd>Esc</kbd>, pick the frozen app, click Force Quit.</p>
+  <div class="btns">
+    <a class="btn primary" href="#install">Install in 30 seconds</a>
+    <a class="btn secondary" href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">★ Star on GitHub</a>
+  </div>
+</header>
+
+<div class="wrap shots">
+  <img src="img/force-quit.png" width="420" height="410" alt="Force Quit Applications window on Ubuntu, light mode">
+  <img src="img/force-quit-dark.png" width="420" height="410" alt="Force Quit Applications window on Ubuntu, dark mode">
+</div>
+
+<section class="wrap">
+  <h2>Everything you remember from the Mac</h2>
+  <div class="grid">
+    <div class="card"><h3>One shortcut</h3><p><kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Esc</kbd> opens it from anywhere. Pressing it again brings the window to the front.</p></div>
+    <div class="card"><h3>Not Responding</h3><p>Frozen apps are shown in red, so you can see which one is stuck.</p></div>
+    <div class="card"><h3>Same confirmation</h3><p>“Do you want to force ‘App’ to quit? You will lose any unsaved changes.”</p></div>
+    <div class="card"><h3>Quit several at once</h3><p>Ctrl- or Shift-click to select several apps, then quit them together.</p></div>
+    <div class="card"><h3>Built for Wayland</h3><p>Works where <code>xkill</code> doesn't, by finding apps through systemd scopes instead of windows.</p></div>
+    <div class="card"><h3>Light &amp; dark</h3><p>Follows your GNOME appearance and keeps the macOS look on any GTK theme.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="install">
+  <h2>Install</h2>
+  <p>Needs Python 3 and GTK 4, which ship with Ubuntu and Fedora Workstation.</p>
+<pre><code>git clone https://github.com/adgsenpai/AppleLinuxLikeForceQuit.git
+cd AppleLinuxLikeForceQuit
+./install.sh</code></pre>
+  <p>That's it. Press <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Esc</kbd>. Want a different key? <code>SHORTCUT='&lt;Control&gt;&lt;Super&gt;Escape' ./install.sh</code>. Remove with <code>./uninstall.sh</code>.</p>
+</section>
+
+<section class="wrap" id="blog">
+  <h2>From the blog</h2>
+  <ul class="post-list">
+    <li><a class="card" href="blog/macos-force-quit-for-linux.html">
+      <time datetime="2026-10-07">7 Oct 2026</time>
+      <h3>I cloned macOS Force Quit for Linux (and made Super+Alt+Esc work on Wayland)</h3>
+      <p>Why Wayland makes “list every app” hard, how systemd scopes solve it, and how I made GTK 4 look like macOS.</p>
+    </a></li>
+    <li><a class="card" href="blog/how-to-force-quit-frozen-apps-on-linux.html">
+      <time datetime="2026-10-07">7 Oct 2026</time>
+      <h3>How to force quit a frozen app on Linux (Ubuntu, GNOME, Wayland)</h3>
+      <p>Every way to kill an unresponsive app: the GNOME dialog, System Monitor, terminal commands, and a one-key shortcut.</p>
+    </a></li>
+  </ul>
+</section>
+
+<footer><div class="wrap">
+  Made with <span aria-label="love">❤️</span> by <a href="https://adgstudios.co.za"><strong>ADGSTUDIOS</strong></a> · MIT licensed · <a href="https://github.com/adgsenpai/AppleLinuxLikeForceQuit">Source on GitHub</a> · macOS is a trademark of Apple Inc. Not affiliated with Apple.
+</div></footer>
+</body>
+</html>
