@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Force Quit Applications
+Comment=Force quit apps that stopped responding (Super+Alt+Escape)
+Exec=force-quit
+Icon=process-stop
+Terminal=false
+Categories=System;Utility;Monitor;
+Keywords=kill;force;quit;xkill;task;process;
+StartupNotify=true
